@@ -1,0 +1,271 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define ROWS 6
+#define COLS 7
+#define HIGHSCORE_FILE "highscore.txt"
+
+int board[ROWS][COLS];
+
+// Struktur zur Speicherung von Spielergebnissen
+struct Highscore {
+    char name[50];
+    int score;
+};
+
+// Funktion zum Initialisieren des Spielfelds
+void initializeBoard() {
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            board[i][j] = 0;
+        }
+    }
+}
+
+// Funktion zum Ausgeben des Spielfelds
+void printBoard() {
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            if (board[i][j] == 0) {
+                printf(". ");
+            } else if (board[i][j] == 1) {
+                printf("X ");
+            } else {
+                printf("O ");
+            }
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+// Funktion zum Überprüfen, ob ein Zug legal ist
+int isLegalMove(int col) {
+    return col >= 1 && col <= COLS && board[0][col - 1] == 0;
+}
+
+// Funktion zum Ausführen eines Zuges
+void makeMove(int col, int player) {
+    for (int i = ROWS - 1; i >= 0; i--) {
+        if (board[i][col - 1] == 0) {
+            board[i][col - 1] = player;
+            break;
+        }
+    }
+}
+
+// Funktion zum Überprüfen, ob ein Spieler gewonnen hat
+int checkWin(int player) {
+    // Überprüfen auf horizontale Gewinne
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j <= COLS - 4; j++) {
+            if (board[i][j] == player &&
+                board[i][j + 1] == player &&
+                board[i][j + 2] == player &&
+                board[i][j + 3] == player) {
+                return 1; // Spieler hat gewonnen
+            }
+        }
+    }
+
+    // Überprüfen auf vertikale Gewinne
+    for (int i = 0; i <= ROWS - 4; i++) {
+        for (int j = 0; j < COLS; j++) {
+            if (board[i][j] == player &&
+                board[i + 1][j] == player &&
+                board[i + 2][j] == player &&
+                board[i + 3][j] == player) {
+                return 1; // Spieler hat gewonnen
+            }
+        }
+    }
+
+    // Überprüfen auf diagonale Gewinne (nach rechts unten)
+    for (int i = 0; i <= ROWS - 4; i++) {
+        for (int j = 0; j <= COLS - 4; j++) {
+            if (board[i][j] == player &&
+                board[i + 1][j + 1] == player &&
+                board[i + 2][j + 2] == player &&
+                board[i + 3][j + 3] == player) {
+                return 1; // Spieler hat gewonnen
+            }
+        }
+    }
+
+    // Überprüfen auf diagonale Gewinne (nach rechts oben)
+    for (int i = 3; i < ROWS; i++) {
+        for (int j = 0; j <= COLS - 4; j++) {
+            if (board[i][j] == player &&
+                board[i - 1][j + 1] == player &&
+                board[i - 2][j + 2] == player &&
+                board[i - 3][j + 3] == player) {
+                return 1; // Spieler hat gewonnen
+            }
+        }
+    }
+
+    return 0; // Kein Spieler hat gewonnen
+}
+
+// Funktion zum Aktualisieren des Highscores
+void updateHighscore(const char *name, int score) {
+    FILE *file = fopen(HIGHSCORE_FILE, "a");
+
+    if (file) {
+        fprintf(file, "%s %d\n", name, score);
+        fclose(file);
+    }
+}
+
+// Funktion zum Anzeigen des Highscores
+void displayHighscore() {
+    FILE *file = fopen(HIGHSCORE_FILE, "r");
+
+    if (file) {
+        printf("Highscore:\n");
+        struct Highscore scores[10];
+        int numScores = 0;
+
+        // Einlesen der Highscores aus der Datei
+        while (fscanf(file, "%s %d", scores[numScores].name, &scores[numScores].score) != EOF) {
+            numScores++;
+        }
+
+        // Sortieren der Highscores (einfacher Bubble-Sort)
+        for (int i = 0; i < numScores - 1; i++) {
+            for (int j = 0; j < numScores - i - 1; j++) {
+                if (scores[j].score < scores[j + 1].score) {
+                    struct Highscore temp = scores[j];
+                    scores[j] = scores[j + 1];
+                    scores[j + 1] = temp;
+                }
+            }
+        }
+
+        // Anzeigen der Highscores
+        for (int i = 0; i < numScores && i < 10; i++) {
+            printf("%d. %s: %d\n", i + 1, scores[i].name, scores[i].score);
+        }
+
+        fclose(file);
+    }
+}
+
+// Funktion zum Fragen, ob eine neue Runde gespielt werden soll
+int askForNewRound() {
+    int choice;
+
+    printf("Möchten Sie eine neue Runde spielen? (1 für Ja, 0 für Nein): ");
+    scanf("%d", &choice);
+
+    return choice;
+}
+
+// Funktion zum Fragen, ob der Spielmodus geändert werden soll
+int askForModeChange() {
+    int choice;
+
+    printf("Möchten Sie den Spielmodus ändern? (1 für Ja, 0 für Nein): ");
+    scanf("%d", &choice);
+
+    return choice;
+}
+
+int main() {
+    int currentPlayer = 1;
+    int isGameOver = 0;
+    int isAgainstAI;
+
+    initializeBoard();
+    srand(time(NULL));
+
+    char playerName1[50], playerName2[50];
+    
+    // Abfrage, ob gegen die KI gespielt werden soll
+    printf("Möchten Sie gegen die KI spielen? (1 für Ja, 0 für Nein): ");
+    scanf("%d", &isAgainstAI);
+
+    // Eingabe des Namens des ersten Spielers
+    printf("Geben Sie den Namen des ersten Spielers ein: ");
+    scanf("%s", playerName1);
+
+    // Eingabe des Namens des zweiten Spielers, falls im Spieler-gegen-Spieler-Modus
+    if (!isAgainstAI) {
+        printf("Geben Sie den Namen des zweiten Spielers ein: ");
+        scanf("%s", playerName2);
+    }
+
+    do {
+        while (!isGameOver) {
+            printBoard();
+
+            int col;
+            
+            // Spieler 1 ist am Zug
+            if (currentPlayer == 1) {
+                do {
+                    printf("%s (X), wählen Sie eine Spalte (1-7): ", playerName1);
+                    scanf("%d", &col);
+                } while (!isLegalMove(col));
+            } else {
+                // Im KI-Modus ist die KI am Zug, sonst Spieler 2
+                if (isAgainstAI) {
+                    do {
+                        col = rand() % COLS + 1;
+                    } while (!isLegalMove(col));
+                } else {
+                    do {
+                        printf("%s (O), wählen Sie eine Spalte (1-7): ", playerName2);
+                        scanf("%d", &col);
+                    } while (!isLegalMove(col));
+                }
+            }
+
+            // Ausführen des Zuges
+            makeMove(col, currentPlayer);
+
+            // Überprüfen, ob ein Spieler gewonnen hat
+            if (checkWin(currentPlayer)) {
+                isGameOver = 1;
+                printBoard();
+                // Ausgabe des Gewinners und Aktualisierung des Highscores
+                if (isAgainstAI) {
+                    printf("%s gewinnt!\n", playerName1);
+                    updateHighscore(playerName1, 1);
+                } else {
+                    printf("%s gewinnt!\n", (currentPlayer == 1) ? playerName1 : playerName2);
+                    updateHighscore((currentPlayer == 1) ? playerName1 : playerName2, 1);
+                }
+                
+                displayHighscore();
+            } else if (currentPlayer == 1) {
+                currentPlayer = 2;
+            } else {
+                currentPlayer = 1;
+            }
+        }
+
+        isGameOver = 0;
+        initializeBoard();
+        currentPlayer = 1;
+
+        // Nach dem Spiel fragen, ob der Modus geändert werden soll
+        if (isAgainstAI) {
+            if (askForModeChange()) {
+                printf("Wechsel zu Spieler gegen Spieler Modus.\n");
+                isAgainstAI = 0;
+                printf("Geben Sie den Namen des zweiten Spielers ein: ");
+                scanf("%s", playerName2);
+            }
+        } else {
+            if (askForModeChange()) {
+                printf("Wechsel zu KI Modus.\n");
+                isAgainstAI = 1;
+            }
+        }
+
+    } while (askForNewRound());
+
+    return 0;
+}
