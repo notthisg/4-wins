@@ -1,1 +1,1 @@
-Simply Copy code into a Compiler 
+Copy Code into Compiler
