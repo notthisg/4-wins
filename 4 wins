@@ -40,12 +40,12 @@ void printBoard() {
     printf("\n");
 }
 
-// Funktion zum Überprüfen, ob ein Zug legal ist
+// Funktion zum Ueberpruefen, ob ein Zug legal ist
 int isLegalMove(int col) {
     return col >= 1 && col <= COLS && board[0][col - 1] == 0;
 }
 
-// Funktion zum Ausführen eines Zuges
+// Funktion zum ausfuehren eines Zuges
 void makeMove(int col, int player) {
     for (int i = ROWS - 1; i >= 0; i--) {
         if (board[i][col - 1] == 0) {
@@ -55,9 +55,9 @@ void makeMove(int col, int player) {
     }
 }
 
-// Funktion zum Überprüfen, ob ein Spieler gewonnen hat
+// Funktion zum Ueberpruefen, ob ein Spieler gewonnen hat
 int checkWin(int player) {
-    // Überprüfen auf horizontale Gewinne
+    // Ueberpruefen auf horizontale Gewinne
     for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j <= COLS - 4; j++) {
             if (board[i][j] == player &&
@@ -69,7 +69,7 @@ int checkWin(int player) {
         }
     }
 
-    // Überprüfen auf vertikale Gewinne
+    // Ueberpruefen auf vertikale Gewinne
     for (int i = 0; i <= ROWS - 4; i++) {
         for (int j = 0; j < COLS; j++) {
             if (board[i][j] == player &&
@@ -81,7 +81,7 @@ int checkWin(int player) {
         }
     }
 
-    // Überprüfen auf diagonale Gewinne (nach rechts unten)
+    // Ueberpruefen auf diagonale Gewinne (nach rechts unten)
     for (int i = 0; i <= ROWS - 4; i++) {
         for (int j = 0; j <= COLS - 4; j++) {
             if (board[i][j] == player &&
@@ -93,7 +93,7 @@ int checkWin(int player) {
         }
     }
 
-    // Überprüfen auf diagonale Gewinne (nach rechts oben)
+    // Ueberpruefen auf diagonale Gewinne (nach rechts oben)
     for (int i = 3; i < ROWS; i++) {
         for (int j = 0; j <= COLS - 4; j++) {
             if (board[i][j] == player &&
@@ -156,7 +156,7 @@ void displayHighscore() {
 int askForNewRound() {
     int choice;
 
-    printf("Möchten Sie eine neue Runde spielen? (1 für Ja, 0 für Nein): ");
+    printf("Moechten Sie eine neue Runde spielen? (1 für Ja, 0 für Nein): ");
     scanf("%d", &choice);
 
     return choice;
@@ -166,7 +166,7 @@ int askForNewRound() {
 int askForModeChange() {
     int choice;
 
-    printf("Möchten Sie den Spielmodus ändern? (1 für Ja, 0 für Nein): ");
+    printf("Moechten Sie den Spielmodus Aendern? (1 für Ja, 0 für Nein): ");
     scanf("%d", &choice);
 
     return choice;
@@ -183,7 +183,7 @@ int main() {
     char playerName1[50], playerName2[50];
     
     // Abfrage, ob gegen die KI gespielt werden soll
-    printf("Möchten Sie gegen die KI spielen? (1 für Ja, 0 für Nein): ");
+    printf("Moechten Sie gegen die KI spielen? (1 für Ja, 0 für Nein): ");
     scanf("%d", &isAgainstAI);
 
     // Eingabe des Namens des ersten Spielers
@@ -222,10 +222,10 @@ int main() {
                 }
             }
 
-            // Ausführen des Zuges
+            // ausfuehren des Zuges
             makeMove(col, currentPlayer);
 
-            // Überprüfen, ob ein Spieler gewonnen hat
+            // Ueberpruefen, ob ein Spieler gewonnen hat
             if (checkWin(currentPlayer)) {
                 isGameOver = 1;
                 printBoard();
